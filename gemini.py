@@ -3,33 +3,46 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-
-
 load_dotenv()
 APP_KEY = os.getenv("APP_KEY")
-def get_nutrition(text,display= False):
-    refined_query = ""
-    genai.configure(api_key=APP_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-   # response = model.generate_content(f"calorieee vlue of {qty} {text} with percentage of content with out explaination")
 
-    if display:
-        refined_query =refined_query=(f"Calculate the approximate total calories and macronutrient composition for the following list of food items: {text}. "
-                                      f"Provide a general estimate, even if specific details about preparation or type are missing . Dont include any extra text. Present the results as: Total calories till now: [value] kcal, protein: [value] g, carbohydrates: [value] g, fats: [value] g format the answer in SMS format for every new line")
-    else:
-       refined_query=(f"Provide the calorie value and percentage composition of {text}. "
-                     f"if no  quantity or measure provided given average calories value"
-                     f"Include only numerical values with the units. Dont include any extra text.Present the results as: calories of given food name also give default measure as [Food Name] (Default Measure): [calories] kcal, protein: [protein] g, carbs: [carbs] g, fats: [fats] g format the answer in SMS format for every new line")
-    response = model.generate_content(refined_query)
-    text = response.text
-    print(text)
-    return response.text
+def get_nutrition(text, display=False):
+    """
+    Retrieves nutrition information for a given food item or list of items using the Gemini API.
 
-def main():
-    get_nutrition('Track rice',True )
+    Args:
+        text: The food item or list of food items.
+        display: If True, provides a summary of total calories and macronutrients.
+                 If False, provides detailed nutrition information for each item.
 
-if __name__ == "__main__":
-    main()
+    Returns:
+        The nutrition information as a string, or None if an error occurs.
+    """
+    try:
+        genai.configure(api_key=APP_KEY)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        if display:
+            refined_query = (
+                f"Calculate the approximate total calories and macronutrient composition for: {text}. "
+                "Provide a general estimate. "
+                "Format: Total calories: [value] kcal, Protein: [value] g, Carbs: [value] g, Fats: [value] g"
+            )
+        else:
+            refined_query = (
+                f"Provide the calorie and macronutrient composition for: {text}. "
+                "If no quantity is given, provide average values. "
+                "Format: [Food Name]: Calories: [value] kcal, Protein: [value] g, Carbs: [value] g, Fats: [value] g"
+            )
+
+        response = model.generate_content(refined_query)
+        return response.text
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
 
 
 
